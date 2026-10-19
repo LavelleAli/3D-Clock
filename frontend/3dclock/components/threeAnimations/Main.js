@@ -3,10 +3,10 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
+import createNebula from "./CreateNebula";
 
 const Main = () => {
   const mountRef = useRef(null);
-  
 
   useEffect(() => {
 
@@ -16,6 +16,7 @@ const Main = () => {
     const mount = mountRef.current;
 
     const scene = new THREE.Scene();
+    const nebula = createNebula(scene);
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -27,24 +28,29 @@ const Main = () => {
     mount.appendChild(renderer.domElement);
 
     // The Object:
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    const geometry = new THREE.SphereGeometry(1, 32, 16);
+    const material = new THREE.MeshBasicMaterial({ color: 'skyblue' });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
 
     camera.position.z = 5;
 
     function animate(time) {
-        cube.rotation.x = time / 2000;
-        cube.rotation.y = time / 2000;
+      sphere.rotation.x = time / 2000;
+      sphere.rotation.y = time / 2000;
       renderer.render(scene, camera);
+      nebula.update();
     }
     renderer.setAnimationLoop(animate);
+    return () => {
+        renderer.setAnimationLoop(null);
+        nebula.destroy();
+        renderer.dispose();
+        mount.removeChild(renderer.domElement)
+    }
   }, []);
 
-  return <div ref={mountRef}>
-    
-  </div>;
+  return <div ref={mountRef}></div>;
 };
 
 export default Main;
