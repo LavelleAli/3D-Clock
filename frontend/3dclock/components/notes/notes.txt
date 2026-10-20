@@ -1,1 +1,102 @@
 FYI: "you can go to 'https://tailwindcss.com/docs/colors#working-with-colors' and copy tailwind colors to 'hex code' by using 'shift' + left-click!!"
+
+
+==================================================================
+TERMS LEARNED (Oct 2026)
+==================================================================
+
+--- ANIMATION & MATH ---
+Lerp (linear interpolation) - move a fraction of the way from one value to another:
+    current += (target - current) * t
+Easing / smoothing - motion that slows down as it reaches its target; lerping every frame produces it
+Normalize - turn a value into a 0-to-1 fraction by dividing by its full size (clientX / innerWidth)
+Scale / shift / flip - the other range moves: multiply to stretch, add/subtract to slide, multiply by -1 to turn upside down
+    Tip: always MULTIPLY to scale (* 0.1, not / 10). Dividing by a decimal makes things BIGGER.
+    Tip: check a formula by plugging in the min, middle, and max values.
+Sine / cosine wave - Math.sin / Math.cos turn a growing number into a smooth back-and-forth between -1 and 1; together they trace a circle
+Period (2 pi) - one full sin wave takes about 6.28 of input
+Radians vs degrees - Math.PI radians = 180 degrees. Three.js uses radians; nebula Rotate(x, y, z) uses degrees
+Frame / animation loop - a function that runs ~60 times a second to redraw the scene (setAnimationLoop)
+Frame-rate dependent - motion that runs faster on faster screens because it changes per FRAME, not per second
+Idle detection - notice something ISN'T happening by remembering when it last happened and comparing to now
+
+--- THREE.JS ---
+Scene / camera / renderer - the world, the viewpoint, and the thing that draws the world from that viewpoint
+Mesh - a visible object = geometry (shape) + material (look)
+Vertices / segments - the corner points and slices a 3D shape is built from; more segments = smoother
+Wireframe - material setting that shows only a shape's triangle edges
+Vector3 - three numbers (x, y, z) treated as one thing: a POSITION or a DIRECTION
+Normalized vector - a direction vector shrunk to length 1 so only its direction matters
+World units - the measurement inside the 3D scene; unrelated to screen pixels
+lookAt - turns an object (like the camera) to face a point
+dispose - frees the GPU memory an object used
+
+--- THREE-NEBULA (PARTICLES) ---
+Particle system / emitter - the manager of all particles / the thing that creates them
+Initializer - sets something ONCE when a particle is born (Position, Life, Mass, Body...)
+Behaviour - changes particles EVERY FRAME over their life (Alpha, Scale, Color, Rotate, Gravity...)
+Zone - an area where particles spawn (PointZone, BoxZone, SphereZone); goes INSIDE Position(...)
+Rate / Span - how many particles are created and how often; a Span is a random range
+Life - how long a particle exists; also the timeline for Alpha / Scale / Color
+Mass - how strongly forces like Gravity affect a particle
+MeshRenderer vs SpriteRenderer - particles as 3D objects vs flat images that always face the camera
+
+--- JAVASCRIPT ---
+Return value - what a function gives back; you must CATCH it with =, or it's lost
++ vs += - "+" calculates; "+=" calculates AND saves onto the existing value
+Ternary - condition ? ifTrue : ifFalse
+const vs let - const can't be reassigned; let can
+Event listener - a function that runs when something happens (addEventListener); remove it in cleanup (removeEventListener)
+Named function - a function with a name so you can refer to it again (needed to remove listeners)
+performance.now() - current time in milliseconds since the page loaded
+NaN - "Not a Number", the result of invalid math
+Destructuring - pulling several values out of an object at once: const { a, b } = obj
+Global object (window.X) - how libraries loaded with a <script> tag expose themselves instead of import
+
+--- REACT / NEXT.JS ---
+Prerendering - Next.js runs components on the server ahead of time (why window / Math.random() errored)
+Client Component ('use client') - runs in the browser, but is still prerendered once on the server
+useEffect - runs code AFTER the component appears in the browser; the safe place for Three.js setup
+Cleanup function - what useEffect returns, to undo its setup when the component goes away
+useRef - a handle on a real DOM element (the <div> the canvas goes in)
+Strict Mode double-mount - in development React mounts components twice on purpose to catch missing cleanup
+
+--- GIT & TERMINAL ---
+Embedded repository - a git repo inside another git repo; the outer one only stores a pointer to it
+Staging (git add) - choosing which changes go into the next commit
+git rm --cached - remove something from staging without deleting the file
+Relative path - a path that starts from the folder your terminal is currently in
+Heredoc (<<'EOF') - pass a block of text into a command so the shell doesn't run its lines as commands
+zsh comments - "#" is NOT a comment in the Mac terminal by default; don't put # notes after commands
+
+--- COLORS ---
+Hex code - a color as #RRGGBB (#87ceeb), or 0x87ceeb in JavaScript
+oklch - newer color format Tailwind v4 uses; Three.js can't read it
+Tailwind class vs color - "yellow-200" is a CSS class name, not a color value Three.js understands
+
+--- IDLE DRIFT FROM THE MOUSE (polar coordinates) ---
+Polar coordinates - describing a point as an ANGLE + a DISTANCE from the center (like a clock hand) instead of x + y
+Math.atan2(y, x) - turns x/y into an angle in radians. Y COMES FIRST!
+    right = 0, top = 1.57 (PI/2), left = 3.14 (PI), bottom = -1.57
+Math.hypot(x, y) - turns x/y into a distance from the center
+Back to x/y - x = Math.cos(angle) * distance, y = Math.sin(angle) * distance
+    cos = "how far right", sin = "how far up" for a hand of length 1; * distance makes the hand the right length
+    Keep the angle ALONE inside the parentheses; multiply the RESULT outside them
+Continuing a circle from a point - angle = startAngle + elapsed * speed
+    at elapsed = 0 the angle is exactly the start, so there's no jump
+Math.max(a, b) - returns the bigger number; use it to set a MINIMUM (Math.max(0.5, value) never goes below 0.5)
+Elapsed time since an event - now - (when it happened); negative before it happens, 0 at the moment, counts up after
+    e.g. idleTime = time - (lastMoveTime + delay)
+Milliseconds vs seconds - * 0.001 converts ms to seconds; subtract delays in the SAME unit as the value
+Keep shared numbers in one place - if two lines use the same delay, make it one const so they can't drift apart
+
+--- JAVASCRIPT GOTCHAS ---
+Operator precedence - * and / happen before + and -
+    2 + 3 * 10 = 32, but (2 + 3) * 10 = 50. Parentheses group things so they happen first
+Commas in a function call - mean SEPARATE inputs, not "combine"; extra inputs are silently ignored
+    Math.sin(a, b) only uses a. Math.round(4.7, 2) = 5
+Numbers vs objects - .x / .y only exist on objects that have them (mouse, camera.position); a plain number has no .x
+    reading a missing property gives undefined, and math with undefined gives NaN
+NaN is sticky - anything combined with NaN is NaN; once the camera position is NaN it stays broken until reload
+camelCase vs PascalCase - variables are camelCase (idleTime); components and classes are PascalCase (Main, THREE.Scene)
+Comparisons already give true/false - "idle === true" is the same as "idle"; "x > y ? true : false" is the same as "x > y"

@@ -5,7 +5,6 @@ import createNebula from "./CreateNebula";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
-
 const Main = () => {
   const mountRef = useRef(null);
 
@@ -53,13 +52,15 @@ const Main = () => {
     function animate(time) {
       sphere.rotation.x = time / 2000;
       sphere.rotation.y = time / 2000;
-      const idle = time - lastMoveTime > 2000;
-      const driftX = time * 0.0001;
-      const driftY = time * 0.0001;
-      const floatX = Math.sin(driftX);
-      const floatY = Math.cos(driftY);
-      const targetX = idle ? floatX : mouse.x;
-      const targetY = idle ? floatY : mouse.y;
+      const idle = time - lastMoveTime > 1000;
+      const idleTime = (time - lastMoveTime - 1000) * 0.001;
+      const startAngle = Math.atan2(mouse.y, mouse.x);
+      const radius = Math.max( 0.05,  Math.hypot(mouse.x, mouse.y));
+      const angle = startAngle + idleTime * 0.1;
+      const driftX = Math.cos(angle ) * radius;
+      const driftY = Math.sin(angle) * radius;
+      const targetX = idle ? driftX : mouse.x;
+      const targetY = idle ? driftY : mouse.y;
       camera.position.x += (targetX * 8 - camera.position.x) * 0.05;
       camera.position.y += (targetY * 8 - camera.position.y) * 0.05;
 
