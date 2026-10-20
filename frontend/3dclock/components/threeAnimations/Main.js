@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import createNebula from "./CreateNebula";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import createNebula from "./CreateNebula";
+
 
 const Main = () => {
   const mountRef = useRef(null);
 
   useEffect(() => {
-
     // const controls = new OrbitControls( camera, rendererReference.domElement );
     // const loader = new GLTFLoader();
 
@@ -28,26 +28,57 @@ const Main = () => {
     mount.appendChild(renderer.domElement);
 
     // The Object:
-    const geometry = new THREE.SphereGeometry(1, 32, 16);
-    const material = new THREE.MeshBasicMaterial({ color: 'skyblue' });
+    const geometry = new THREE.SphereGeometry(0.5, 32, 16);
+    const material = new THREE.MeshBasicMaterial({ color: "#2563eb" });
     const sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    camera.position.z = 5;
+    camera.position.z = 8;
+
+    // camera controls:
+    const mouse = {
+      x: 0,
+      y: 0,
+    };
+
+    let lastMoveTime = 0;
+
+    function cameraMotion(e) {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = (e.clientY / window.innerHeight) * -2 + 1;
+      lastMoveTime = performance.now();
+    }
+    window.addEventListener("pointermove", cameraMotion);
 
     function animate(time) {
       sphere.rotation.x = time / 2000;
       sphere.rotation.y = time / 2000;
+      const idle = time - lastMoveTime > 2000;
+      const driftX = time * 0.0001;
+      const driftY = time * 0.0001;
+      const floatX = Math.sin(driftX);
+      const floatY = Math.cos(driftY);
+      const targetX = idle ? floatX : mouse.x;
+      const targetY = idle ? floatY : mouse.y;
+      camera.position.x += (targetX * 8 - camera.position.x) * 0.05;
+      camera.position.y += (targetY * 8 - camera.position.y) * 0.05;
+
+      camera.lookAt(sphere.position);
+
       renderer.render(scene, camera);
       nebula.update();
     }
+
     renderer.setAnimationLoop(animate);
+
+    // Clean up:
     return () => {
-        renderer.setAnimationLoop(null);
-        nebula.destroy();
-        renderer.dispose();
-        mount.removeChild(renderer.domElement)
-    }
+      renderer.setAnimationLoop(null);
+      nebula.destroy();
+      renderer.dispose();
+      mount.removeChild(renderer.domElement);
+      window.removeEventListener("pointermove", cameraMotion);
+    };
   }, []);
 
   return <div ref={mountRef}></div>;

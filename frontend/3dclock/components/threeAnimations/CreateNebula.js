@@ -19,7 +19,8 @@ import System, {
   Body,
   Rotate,
   Gravity,
-  
+  BoxZone,
+  SphereZone,
 } from "three-nebula";
 
 function createNebula(scene) {
@@ -27,41 +28,42 @@ function createNebula(scene) {
   const renderer = new MeshRenderer(scene, THREE);
   const emitter = new Emitter();
 
-  // Color Scheme: 
-  const YELLOW_200 = '#fef08a';
-  const SKYBLUE_200 = '#bae6fd';
-  const RED_200 = '#fecaca'
+  // Color Scheme:
+  const YELLOW_200 = "#fef08a";
+  const SKYBLUE_200 = "#bae6fd";
+  const RED_200 = "#fecaca";
 
-
-
-  const geometry = new THREE.SphereGeometry(0.1, 8, 6);
+  const geometry = new THREE.SphereGeometry( .15, 8, 6 );
   const material = new THREE.MeshBasicMaterial({ color: "skyblue" });
   const sphere = new THREE.Mesh(geometry, material);
 
   emitter
-    .setRate(new Rate(new Span(4, 16), new Span(0, 0.1)))
+    .setRate(new Rate(new Span( 10, 50), new Span(0, 0.5)))
     .setInitializers([
-      new Position( new PointZone(0, 0,) ),
-      new Mass( .5 ),
-      new Life( 1, 10 ),
-      new RadialVelocity( 3, new Vector3D(0, -1, -1), 180),
+      new Position(new BoxZone( 20, 20, 20)),
+      // new Position( new PointZone(0, 0,) ),
+      new Mass(0.5),
+      new Life(1, 3),
+      // new Life( 1, 10 ),
+      // new RadialVelocity( 3, new Vector3D(0, -1, -1), 180),
       new Body(sphere),
+      
     ])
     .setBehaviours([
       new Alpha(1, 0),
-      new Scale(0.1, 0),
-      new Color([
-        new THREE.Color(YELLOW_200),
-        new THREE.Color(SKYBLUE_200),
-        new THREE.Color(RED_200),
-        new THREE.Color('white'),
-      ],
-      new THREE.Color('random')
+      new Scale(0.15, 0),
+      new Color(
+        [
+          new THREE.Color(YELLOW_200),
+          new THREE.Color(SKYBLUE_200),
+          new THREE.Color(RED_200),
+          new THREE.Color("white"),
+        ],
+        "random",
       ),
-      new Rotate('random'),
-      
+      new Rotate("random"),
     ])
-    .emit();
+    .emit(Infinity);
 
   system
     .addRenderer(renderer)

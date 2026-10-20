@@ -1,0 +1,1 @@
+FYI: "you can go to 'https://tailwindcss.com/docs/colors#working-with-colors' and copy tailwind colors to 'hex code' by using 'shift' + left-click!!"
