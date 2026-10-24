@@ -4,8 +4,6 @@ import * as THREE from "three";
 import createNebula from "./CreateNebula";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import { texture } from "three/tsl";
-
 
 const Main = () => {
   const mountRef = useRef(null);
@@ -15,6 +13,7 @@ const Main = () => {
     // const loader = new GLTFLoader();
 
     const mount = mountRef.current;
+    let stillActive = true;
 
     const scene = new THREE.Scene();
     const nebula = createNebula(scene);
@@ -37,6 +36,12 @@ const Main = () => {
     async function sphereTexture() {
       const loader = new THREE.TextureLoader();
       const texture = await loader.loadAsync("/equirectangularEarth2-1.jpg");
+
+     
+      if (!stillActive) {
+        texture.dispose();
+        return;
+      }
 
       material.map = texture;
       material.needsUpdate = true;
@@ -86,12 +91,13 @@ const Main = () => {
 
     // Clean up:
     return () => {
+      stillActive = false;
       renderer.setAnimationLoop(null);
       nebula.destroy();
       renderer.dispose();
+      material.map?.dispose();
       geometry.dispose();
       material.dispose();
-      
       mount.removeChild(renderer.domElement);
       window.removeEventListener("pointermove", cameraMotion);
     };
