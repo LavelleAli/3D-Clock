@@ -37,7 +37,6 @@ const Main = () => {
       const loader = new THREE.TextureLoader();
       const texture = await loader.loadAsync("/equirectangularEarth2-1.jpg");
 
-     
       if (!stillActive) {
         texture.dispose();
         return;
