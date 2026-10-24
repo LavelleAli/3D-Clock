@@ -4,6 +4,8 @@ import * as THREE from "three";
 import createNebula from "./CreateNebula";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
+import { texture } from "three/tsl";
+
 
 const Main = () => {
   const mountRef = useRef(null);
@@ -28,9 +30,18 @@ const Main = () => {
 
     // The Object:
     const geometry = new THREE.SphereGeometry(0.5, 32, 16);
-    const material = new THREE.MeshBasicMaterial({ color: "#2563eb" });
+    const material = new THREE.MeshBasicMaterial({ color: "white", map: null });
     const sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
+
+    async function sphereTexture() {
+      const loader = new THREE.TextureLoader();
+      const texture = await loader.loadAsync("/equirectangularEarth2-1.jpg");
+
+      material.map = texture;
+      material.needsUpdate = true;
+    }
+    sphereTexture();
 
     camera.position.z = 8;
 
@@ -49,15 +60,16 @@ const Main = () => {
     }
     window.addEventListener("pointermove", cameraMotion);
 
+    //  Behaviour:
     function animate(time) {
-      sphere.rotation.x = time / 2000;
+      // sphere.rotation.x = time / 2000;
       sphere.rotation.y = time / 2000;
       const idle = time - lastMoveTime > 1000;
       const idleTime = (time - lastMoveTime - 1000) * 0.001;
       const startAngle = Math.atan2(mouse.y, mouse.x);
-      const radius = Math.max( 0.05,  Math.hypot(mouse.x, mouse.y));
+      const radius = Math.max(0.05, Math.hypot(mouse.x, mouse.y));
       const angle = startAngle + idleTime * 0.1;
-      const driftX = Math.cos(angle ) * radius;
+      const driftX = Math.cos(angle) * radius;
       const driftY = Math.sin(angle) * radius;
       const targetX = idle ? driftX : mouse.x;
       const targetY = idle ? driftY : mouse.y;
@@ -77,6 +89,9 @@ const Main = () => {
       renderer.setAnimationLoop(null);
       nebula.destroy();
       renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+      
       mount.removeChild(renderer.domElement);
       window.removeEventListener("pointermove", cameraMotion);
     };
